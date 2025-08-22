@@ -11,16 +11,6 @@ This repository contains the architecture and documentation for projectpile.tech
 | Backend Hosting | Render / Railway | APIs, Databases, Background Services |
 | Code Repository | GitHub | Version Control & CI/CD Trigger |
 
-## Prerequisites
-
-Before you begin, ensure you have the following accounts set up. All offer generous free tiers sufficient for this architecture:
-
-- [ ] A purchased domain name (projectpile.tech)
-- [ ] A free Cloudflare account
-- [ ] A free GitHub account
-- [ ] A free Vercel (or Netlify) account
-- [ ] A free Render (or Railway) account
-
 ## Core Architecture
 
 The system is designed with a separation of concerns philosophy. Instead of using a single, monolithic provider, we use specialized services for each part of the stack. This provides maximum flexibility, performance, and cost-effectiveness, preventing vendor lock-in.
