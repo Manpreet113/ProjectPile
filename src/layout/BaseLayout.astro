@@ -1,5 +1,6 @@
 ---
 import "../styles/global.css";
+import Nav from "../components/nav";
 ---
 
 <html lang="en">
@@ -25,6 +26,7 @@ import "../styles/global.css";
   <body
     class="bg-background text-foreground font-sans shadow-none min-h-screen"
   >
+    <Nav client:load />
     <main>
       <slot />
     </main>
