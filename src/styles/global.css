@@ -481,3 +481,17 @@
     transform: translateY(0);
   }
 }
+
+/* Animate background */
+@keyframes bgScroll {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0px 20px;
+  }
+}
+
+.animate-bgScroll {
+  animation: bgScroll 2s linear infinite;
+}
