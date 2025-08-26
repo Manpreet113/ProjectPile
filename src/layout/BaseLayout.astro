@@ -26,12 +26,13 @@ import Nav from "../components/nav";
   <body
     class="bg-background text-foreground font-sans shadow-none min-h-2000 max-w-30/31 mx-auto"
   >
+    <!-- Global Background Grid -->
+    <div
+      class="fixed -z-10 inset-0 [background-size:20px_20px] [background-image:radial-gradient(#d4d4d4_1px,transparent_1px)] dark:[background-image:radial-gradient(#404040_1px,transparent_1px)] animate-bgScroll"
+    >
+    </div>
     <Nav client:load />
     <main>
-      <div
-        class="absolute inset-0 [background-size:20px_20px] [background-image:radial-gradient(#d4d4d4_1px,transparent_1px)] dark:[background-image:radial-gradient(#404040_1px,transparent_1px)] animate-bgScroll"
-      >
-      </div>
       <slot />
     </main>
   </body>
