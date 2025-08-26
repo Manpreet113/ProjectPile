@@ -1,0 +1,11 @@
+.cursor-blinker {
+  display: inline-block;
+  width: 30px;
+  animation-name: blink;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes blink {
+  50% {opacity: 0;} /* Cursor disappears halfway through the cycle */
+}

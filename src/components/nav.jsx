@@ -2,7 +2,7 @@ import DarkModeToggle from "./DarkModeToggle";
 
 export default function Nav() {
     return (
-        <nav className="flex sticky top-0 items-center justify-between p-4 border-muted rounded-b-lg border-2 border-t-0 bg-background/50 backdrop-blur-xl max-w-30/31 mx-auto">
+        <nav className="flex sticky top-0 items-center z-50 justify-between p-4 border-muted rounded-b-lg border-2 border-t-0 bg-background/50 backdrop-blur-xl max-w-30/31 mx-auto">
             <div className="text-lg font-bold">The Pile</div>
             <div className="flex items-center gap-2">
                 <DarkModeToggle />

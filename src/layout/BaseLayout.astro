@@ -24,10 +24,14 @@ import Nav from "../components/nav";
     </script>
   </head>
   <body
-    class="bg-background text-foreground font-sans shadow-none min-h-screen"
+    class="bg-background text-foreground font-sans shadow-none min-h-screen max-w-30/31 mx-auto"
   >
     <Nav client:load />
     <main>
+      <div
+        class="absolute inset-0 [background-size:20px_20px] [background-image:radial-gradient(#d4d4d4_1px,transparent_1px)] dark:[background-image:radial-gradient(#404040_1px,transparent_1px)]"
+      >
+      </div>
       <slot />
     </main>
   </body>

@@ -1,2 +1,54 @@
-<section class="hero min-h-2000">
+---
+import Typewriter from "./Typewriter";
+---
+
+<section
+  class="hero pt-6 pb-20 md:pt-48 md:pb-32 flex flex-col items-center text-center overflow-hidden animate-fade-in"
+>
+  <div class="hero-content relative z-10 reveal-stagger">
+    <h1 class="text-heading-3">WELCOME!</h1>
+    <h1
+      class="text-heading-1 mb-6 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent drop-shadow-lg bg-[length:200%_auto]"
+    >
+        <Typewriter text="TO THE ROOT" client:load/>
+    </h1>
+    <p
+      class="text-heading-5 text-primary font-semibold mb-8 max-w-4xl mx-auto px-4"
+    >
+      A 404 with benefits. The projects survived.
+    </p>
+    <p
+      class="max-w-3xl text-body-large text-muted-foreground mb-12 mx-auto px-4"
+    >
+      This page only exists so you don’t crash into the void. Don’t get too comfy — the real stuff lives below.
+    </p>
+
+    <div class="flex flex-col sm:flex-row gap-4 items-center justify-center">
+      <div class="flex flex-col sm:flex-row gap-4 items-center">
+        <a
+          href="#projects"
+          class="group relative inline-flex rounded-full items-center px-8 py-4 font-bold shadow-lg hover:shadow-xl transition-all border-2 border-primary/90 duration-300 text-lg tracking-wide overflow-hidden hover:scale-105 backdrop-blur-xs"
+        >
+          <span
+            class="absolute inset-0 bg-gradient-to-r from-primary/80 to-accent/80 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left rounded-full"
+          ></span>
+          <span class="relative flex items-center">
+            Peek at Pile
+            <svg
+              class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+            </svg>
+          </span>
+        </a>
+      </div>
+    </div>
+  </div>
 </section>
