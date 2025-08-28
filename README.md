@@ -39,8 +39,7 @@ User Request → Cloudflare (DNS) → Correct Hosting Provider (Vercel, Render, 
 ### Step 2: The Public-Facing Site (projectpile.tech)
 
 #### Technology Options:
-- **Astro** (Recommended): Exceptional performance and content-first approach
-- **Next.js**: Powerful React ecosystem and developer experience
+- **Astro** : Exceptional performance and content-first approach
 
 #### Deployment Steps:
 1. Create a new project using your chosen SSG and push to GitHub
