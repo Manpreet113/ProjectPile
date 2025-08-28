@@ -24,8 +24,7 @@ export default function Typewriter({ text, typingSpeed = 300 }) {
   return (
     <p>
       {displayText}
-      {/* Show blinking cursor only while typewriting */}
-      {<span className="cursor-blinker">|</span>}
+      {<span className="cursor-blinker text-heading-1 mb-6 bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent drop-shadow-lg bg-[length:200%_auto]">|</span>}
     </p>
   );
 }
