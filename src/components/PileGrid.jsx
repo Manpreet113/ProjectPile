@@ -19,7 +19,7 @@ export const PileGrid = ({ cards }) => {
     }, []);
 
     return (
-        <div className="w-full h-full p-4 pt-0 grid grid-cols-1 md:grid-cols-3 max-w-7xl mx-auto gap-4 relative">
+        <div className="w-full h-full p-4 pt-0 grid grid-cols-1 max-w-7xl mx-auto gap-4 relative">
             {cards.map((card) => (
                 <div
                     key={card.id}
