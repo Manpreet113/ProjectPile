@@ -26,7 +26,7 @@ const PileGrid = ({ cards }) => {
                     className={`${card.className} cursor-pointer min-h-[300px]`}
                     onClick={() => setSelectedId(card.id)}
                 >
-                    <div className="rounded-xl h-full w-full overflow-hidden relative">
+                    <div className="rounded-xl h-full w-full overflow-hidden relative border-4 border-muted">
                         <img
                             src={card.thumbnail}
                             height="500"
@@ -78,27 +78,27 @@ const SelectedCardContent = ({ selected }) => {
 // --- Demo Data ---
 const SkeletonOne = () => (
     <div>
-        <p className="font-bold md:text-4xl text-xl text-white">House in the woods</p>
+        <p className="font-bold md:text-4xl text-xl text-white">HyprL</p>
         <p className="font-normal text-base my-4 max-w-lg text-neutral-200">
-            A serene and tranquil retreat, offering a peaceful escape from the hustle and bustle of city life.
+            HyprL takes the power of Hyprland and makes it approachable for everyone by providing one-command installation and beginner friendly guides.
         </p>
     </div>
 );
 
 const SkeletonTwo = () => (
     <div>
-        <p className="font-bold md:text-4xl text-xl text-white">House above the clouds</p>
+        <p className="font-bold md:text-4xl text-xl text-white">Portfolio</p>
         <p className="font-normal text-base my-4 max-w-lg text-neutral-200">
-            Perched high above the world, this house offers breathtaking views and a unique living experience.
+            A showcase of my work, featuring projects that demonstrate my skills and expertise.
         </p>
     </div>
 );
 
 const SkeletonThree = () => (
     <div>
-        <p className="font-bold md:text-4xl text-xl text-white">Greens all over</p>
+        <p className="font-bold md:text-4xl text-xl text-white">Pile root</p>
         <p className="font-normal text-base my-4 max-w-lg text-neutral-200">
-            A house surrounded by greenery and nature's beauty. It's the perfect place to relax and unwind.
+            The root domain for Project Pile, a collection of my projects and experiments in web development and design.
         </p>
     </div>
 );
@@ -119,25 +119,25 @@ const cards = [
         id: 1,
         content: <SkeletonOne />,
         className: "col-span-1",
-        thumbnail: "https://images.unsplash.com/photo-1476231682828-37e571bc172f?q=80&w=1920&auto=format&fit=crop",
-        deployedAt:"https://.projectpile.tech",
-        repo: "https://github.com/Manpreet113/"
+        thumbnail: "/assets/hyprl.png",
+        deployedAt:"https://hyprl.projectpile.tech",
+        repo: "https://github.com/Manpreet113/hyprL"
     },
     {
         id: 2,
         content: <SkeletonTwo />,
         className: "col-span-1",
-        thumbnail: "https://images.unsplash.com/photo-1464457312035-3d7d0e0c058e?q=80&w=1920&auto=format&fit=crop",
-        deployedAt:"https://.projectpile.tech",
-        repo: "https://github.com/Manpreet113/"
+        thumbnail: "/assets/portfolio.png",
+        deployedAt:"https://manpreet.tech",
+        repo: "https://github.com/Manpreet113/portfolio-site"
     },
     {
         id: 3,
         content: <SkeletonThree />,
         className: "col-span-1",
-        thumbnail: "https://images.unsplash.com/photo-1588880331179-bc9b93a8cb5e?q=80&w=1920&auto=format&fit=crop",
-        deployedAt:"https://.projectpile.tech",
-        repo: "https://github.com/Manpreet113/"
+        thumbnail: "/assets/projectpile.png",
+        deployedAt:"https://projectpile.tech",
+        repo: "https://github.com/Manpreet113/ProjectPile"
     },
     {
         id: 4,
