@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from "react";
 import '../styles/pilegrid.css';
 
-export const PileGrid = ({ cards }) => {
+const PileGrid = ({ cards }) => {
     const [selectedId, setSelectedId] = useState(null);
 
     const selected = useMemo(() => cards.find((card) => card.id === selectedId), [cards, selectedId]);
@@ -23,7 +23,7 @@ export const PileGrid = ({ cards }) => {
             {cards.map((card) => (
                 <div
                     key={card.id}
-                    className={`${card.className} cursor-pointer`}
+                    className={`${card.className} cursor-pointer min-h-[300px]`}
                     onClick={() => setSelectedId(card.id)}
                 >
                     <div className="rounded-xl h-full w-full overflow-hidden relative">
@@ -31,8 +31,8 @@ export const PileGrid = ({ cards }) => {
                             src={card.thumbnail}
                             height="500"
                             width="500"
-                            className="object-cover object-center absolute inset-0 h-full w-full"
-                            alt="thumbnail"
+                            className="object-cover object-top absolute inset-0 h-full w-full"
+                            alt={card.name}
                         />
                     </div>
                 </div>
@@ -52,7 +52,7 @@ export const PileGrid = ({ cards }) => {
                                 height="500"
                                 width="500"
                                 className="object-cover object-center absolute inset-0 h-full w-full"
-                                alt="thumbnail"
+                                alt={selected.name}
                             />
                             <SelectedCardContent selected={selected} />
                         </div>
@@ -105,44 +105,55 @@ const SkeletonThree = () => (
 
 const SkeletonFour = () => (
     <div>
-        <p className="font-bold md:text-4xl text-xl text-white">Rivers are serene</p>
+        <p className="font-bold md:text-4xl text-xl text-white">NoteHole</p>
         <p className="font-normal text-base my-4 max-w-lg text-neutral-200">
-            A house by the river is a place of peace and tranquility. It's the perfect place to enjoy life.
+            A secure encrypted note-taking app built from using React, Tailwind CSS, and Supabase.
         </p>
     </div>
 );
+
+
 
 const cards = [
     {
         id: 1,
         content: <SkeletonOne />,
-        className: "md:col-span-2",
+        className: "col-span-1",
         thumbnail: "https://images.unsplash.com/photo-1476231682828-37e571bc172f?q=80&w=1920&auto=format&fit=crop",
+        deployedAt:"https://.projectpile.tech",
+        repo: "https://github.com/Manpreet113/"
     },
     {
         id: 2,
         content: <SkeletonTwo />,
         className: "col-span-1",
         thumbnail: "https://images.unsplash.com/photo-1464457312035-3d7d0e0c058e?q=80&w=1920&auto=format&fit=crop",
+        deployedAt:"https://.projectpile.tech",
+        repo: "https://github.com/Manpreet113/"
     },
     {
         id: 3,
         content: <SkeletonThree />,
         className: "col-span-1",
         thumbnail: "https://images.unsplash.com/photo-1588880331179-bc9b93a8cb5e?q=80&w=1920&auto=format&fit=crop",
+        deployedAt:"https://.projectpile.tech",
+        repo: "https://github.com/Manpreet113/"
     },
     {
         id: 4,
+        name: "NoteHole",
         content: <SkeletonFour />,
-        className: "md:col-span-2",
-        thumbnail: "https://images.unsplash.com/photo-1475070929565-c985b496cb9f?q=80&w=1920&auto=format&fit=crop",
+        className: "col-span-1",
+        thumbnail: "/assets/notehole.png",
+        deployedAt: "https://notehole.projectpile.tech",
+        repo: "https://github.com/Manpreet113/NoteHole",
     },
 ];
 
-// --- Wrapper Component to use in Astro ---
+// --- Wrapper Component used in Astro ---
 export function PileGridDemo() {
     return (
-        <div className="h-screen py-20 w-full">
+        <div className="h-full py-20 w-full">
             <PileGrid cards={cards} />
         </div>
     );
