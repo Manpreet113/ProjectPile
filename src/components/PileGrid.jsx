@@ -41,7 +41,7 @@ export const PileGrid = ({ cards }) => {
             {selected && (
                 <>
                     <div
-                        className="modal-backdrop"
+                        className="modal-backdrop bg-muted/30"
                     />
                     <div className="modal-container"
                         onClick={handleOutsideClick}>
