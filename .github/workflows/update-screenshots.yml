@@ -1,0 +1,91 @@
+name: Update Screenshots
+
+# Triggers for screenshot updates
+on:
+  # Manual trigger
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for updating screenshots'
+        required: false
+        default: 'Manual trigger'
+  
+  # Scheduled updates (weekly on Sundays at 2 AM UTC)
+  schedule:
+    - cron: '0 2 * * 0'
+  
+  # Trigger when screenshot config changes
+  push:
+    paths:
+      - 'scripts/screenshot-config.js'
+      - 'scripts/generate-screenshots.js'
+      - '.github/workflows/update-screenshots.yml'
+    branches: [ main, master ]
+
+jobs:
+  update-screenshots:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Install Playwright browsers
+      run: npx playwright install chromium
+      
+    - name: Generate fresh screenshots
+      run: npm run screenshots
+      
+    - name: Check for changes
+      id: changes
+      run: |
+        if [[ -n $(git status --porcelain public/assets/*.png) ]]; then
+          echo "has-changes=true" >> $GITHUB_OUTPUT
+          echo "Screenshots have been updated"
+        else
+          echo "has-changes=false" >> $GITHUB_OUTPUT
+          echo "No screenshot changes detected"
+        fi
+      
+    - name: Commit and push changes
+      if: steps.changes.outputs.has-changes == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add public/assets/*.png
+        git commit -m "🤖 Auto-update screenshots - $(date -u '+%Y-%m-%d %H:%M UTC')"
+        git push
+      
+    - name: Create summary
+      run: |
+        echo "## Screenshot Update Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Trigger**: ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Timestamp**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+        if [[ "${{ steps.changes.outputs.has-changes }}" == "true" ]]; then
+          echo "- **Status**: ✅ Screenshots updated and committed" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "- **Status**: ℹ️ No changes detected" >> $GITHUB_STEP_SUMMARY
+        fi
+        
+        # List the screenshot files and their sizes
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "### Screenshot Files" >> $GITHUB_STEP_SUMMARY
+        echo "| File | Size |" >> $GITHUB_STEP_SUMMARY
+        echo "|------|------|" >> $GITHUB_STEP_SUMMARY
+        for file in public/assets/*.png; do
+          if [[ -f "$file" ]]; then
+            size=$(du -h "$file" | cut -f1)
+            basename=$(basename "$file")
+            echo "| $basename | $size |" >> $GITHUB_STEP_SUMMARY
+          fi
+        done

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { ExternalLink, Github } from "lucide-react";
+import { PROJECTS } from '../data/projects.js';
 import '../styles/pilegrid.css';
 
 const PileGrid = ({ cards }) => {
@@ -170,44 +171,24 @@ const SkeletonFour = () => (
 
 
 
-const cards = [
-    {
-        id: 1,
-        name: "HyprL",
-        content: <SkeletonOne />,
-        className: "col-span-1",
-        thumbnail: "/assets/hyprl.png",
-        deployedAt:"https://hyprl.projectpile.tech",
-        repo: "https://github.com/Manpreet113/hyprL"
-    },
-    {
-        id: 2,
-        name: "Portfolio",
-        content: <SkeletonTwo />,
-        className: "col-span-1",
-        thumbnail: "/assets/portfolio.png",
-        deployedAt:"https://manpreet.tech",
-        repo: "https://github.com/Manpreet113/portfolio-site"
-    },
-    {
-        id: 3,
-        name: "Project Pile",
-        content: <SkeletonThree />,
-        className: "col-span-1",
-        thumbnail: "/assets/projectpile.png",
-        deployedAt:"https://projectpile.tech",
-        repo: "https://github.com/Manpreet113/ProjectPile"
-    },
-    {
-        id: 4,
-        name: "NoteHole",
-        content: <SkeletonFour />,
-        className: "col-span-1",
-        thumbnail: "/assets/notehole.png",
-        deployedAt: "https://notehole.projectpile.tech",
-        repo: "https://github.com/Manpreet113/NoteHole",
-    },
-];
+// Create content components mapping
+const contentComponents = {
+    "HyprL": SkeletonOne,
+    "Portfolio": SkeletonTwo, 
+    "Project Pile": SkeletonThree,
+    "NoteHole": SkeletonFour
+};
+
+// Generate cards from shared project data
+const cards = PROJECTS.map(project => ({
+    id: project.id,
+    name: project.name,
+    content: React.createElement(contentComponents[project.name]),
+    className: "col-span-1",
+    thumbnail: project.thumbnail,
+    deployedAt: project.url,
+    repo: project.repo
+}));
 
 // --- Wrapper Component used in Astro ---
 export function PileGridDemo() {
