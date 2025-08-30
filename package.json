@@ -4,10 +4,13 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "npm run screenshots && astro build",
+    "build": "npm run screenshots:safe && astro build",
     "build:only": "astro build",
+    "build:vercel": "npm run screenshots:vercel && astro build",
     "preview": "astro preview",
     "screenshots": "node scripts/generate-screenshots.js",
+    "screenshots:safe": "node scripts/generate-screenshots.js || echo 'Screenshot generation failed, continuing with existing screenshots'",
+    "screenshots:vercel": "npx playwright install chromium --force && npm run screenshots:safe",
     "screenshots:dev": "npm run screenshots && npm run dev",
     "screenshots:verify": "node scripts/test-theme-screenshots.js",
     "astro": "astro"
@@ -19,11 +22,9 @@
     "@types/react-dom": "^19.1.7",
     "astro": "^5.13.3",
     "lucide-react": "^0.542.0",
+    "playwright": "^1.55.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwindcss": "^4.1.12"
-  },
-  "devDependencies": {
-    "playwright": "^1.55.0"
   }
 }

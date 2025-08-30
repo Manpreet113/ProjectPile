@@ -179,67 +179,91 @@ async function generateAllScreenshots() {
     // Ensure output directory exists
     await fs.mkdir(outputDir, { recursive: true });
     
-    // Launch browser
-    const browser = await chromium.launch(config.browser);
+    // Check if running in a limited environment (like CI/CD)
+    const isLimitedEnv = process.env.VERCEL || process.env.NETLIFY || process.env.CI;
+    if (isLimitedEnv) {
+        console.log('⚠️ Running in deployment environment, using optimized browser config...');
+        config.browser.args.push(
+            '--disable-web-security',
+            '--disable-features=VizDisplayCompositor',
+            '--run-all-compositor-stages-before-draw',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding',
+            '--disable-field-trial-config',
+            '--disable-ipc-flooding-protection'
+        );
+    }
     
-    const allResults = [];
+    let browser;
+    try {
+        // Launch browser
+        browser = await chromium.launch(config.browser);
+        
+        const allResults = [];
     
-    // Capture screenshots for each project (with all themes)
-    for (const project of PROJECTS) {
-        console.log(`\n📂 Processing ${project.name}...`);
+        // Capture screenshots for each project (with all themes)
+        for (const project of PROJECTS) {
+            console.log(`\n📂 Processing ${project.name}...`);
+            
+            const projectResults = await captureProjectScreenshots(browser, project);
+            allResults.push(...projectResults);
+            
+            // Delay between projects
+            if (PROJECTS.indexOf(project) < PROJECTS.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, config.delayBetweenCaptures));
+            }
+        }
         
-        const projectResults = await captureProjectScreenshots(browser, project);
-        allResults.push(...projectResults);
+        // Calculate statistics
+        const totalExpected = PROJECTS.length * config.themes.capture.length;
+        const successful = allResults.filter(r => r.success).length;
+        const failed = allResults.filter(r => !r.success);
+        const retried = allResults.filter(r => r.attempt > 1).length;
         
-        // Delay between projects
-        if (PROJECTS.indexOf(project) < PROJECTS.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, config.delayBetweenCaptures));
+        // Group results by theme
+        const byTheme = {};
+        config.themes.capture.forEach(theme => {
+            byTheme[theme] = allResults.filter(r => r.theme === theme && r.success).length;
+        });
+        
+        console.log('\n📊 Screenshot Generation Summary:');
+        console.log(`✅ Total successful: ${successful}/${totalExpected}`);
+        
+        if (config.themes.enabled) {
+            console.log('\n🎨 By theme:');
+            Object.entries(byTheme).forEach(([theme, count]) => {
+                console.log(`  ${theme}: ${count}/${PROJECTS.length}`);
+            });
+        }
+        
+        if (retried > 0) {
+            console.log(`\n🔄 Required retries: ${retried}`);
+        }
+        
+        if (failed.length > 0) {
+            console.log('\n❌ Failed:');
+            failed.forEach(f => console.log(`  - ${f.project} (${f.theme}): ${f.error}${f.attempts ? ` (${f.attempts} attempts)` : ''}`));
+        }
+        
+        console.log('\n🎉 Screenshot generation complete!');
+        
+        return {
+            total: totalExpected,
+            successful: successful,
+            failed: failed.length,
+            retried: retried,
+            byTheme: byTheme,
+            results: allResults
+        };
+        
+    } catch (error) {
+        console.error('💥 Browser launch or screenshot generation failed:', error.message);
+        throw error;
+    } finally {
+        if (browser) {
+            await browser.close();
         }
     }
-    
-    await browser.close();
-    
-    // Calculate statistics
-    const totalExpected = PROJECTS.length * config.themes.capture.length;
-    const successful = allResults.filter(r => r.success).length;
-    const failed = allResults.filter(r => !r.success);
-    const retried = allResults.filter(r => r.attempt > 1).length;
-    
-    // Group results by theme
-    const byTheme = {};
-    config.themes.capture.forEach(theme => {
-        byTheme[theme] = allResults.filter(r => r.theme === theme && r.success).length;
-    });
-    
-    console.log('\n📊 Screenshot Generation Summary:');
-    console.log(`✅ Total successful: ${successful}/${totalExpected}`);
-    
-    if (config.themes.enabled) {
-        console.log('\n🎨 By theme:');
-        Object.entries(byTheme).forEach(([theme, count]) => {
-            console.log(`  ${theme}: ${count}/${PROJECTS.length}`);
-        });
-    }
-    
-    if (retried > 0) {
-        console.log(`\n🔄 Required retries: ${retried}`);
-    }
-    
-    if (failed.length > 0) {
-        console.log('\n❌ Failed:');
-        failed.forEach(f => console.log(`  - ${f.project} (${f.theme}): ${f.error}${f.attempts ? ` (${f.attempts} attempts)` : ''}`));
-    }
-    
-    console.log('\n🎉 Screenshot generation complete!');
-    
-    return {
-        total: totalExpected,
-        successful: successful,
-        failed: failed.length,
-        retried: retried,
-        byTheme: byTheme,
-        results: allResults
-    };
 }
 
 // Add support for command line usage
