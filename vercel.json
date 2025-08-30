@@ -1,12 +1,6 @@
 {
   "buildCommand": "node scripts/build-vercel.js",
-  "functions": {
-    "pages/api/**/*.js": {
-      "runtime": "nodejs18.x"
-    }
-  },
   "env": {
     "NODE_VERSION": "18"
-  },
-  "framework": null
+  }
 }
