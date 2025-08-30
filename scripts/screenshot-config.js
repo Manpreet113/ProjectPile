@@ -11,6 +11,7 @@ export const SCREENSHOT_CONFIG = {
     timeout: 30000, // 30 seconds timeout
     waitAfterLoad: 2000, // Additional wait after page load
     delayBetweenCaptures: 1000, // Delay between each screenshot
+    themeWaitDelay: 1000, // Delay between theme captures
     
     // Browser configuration
     browser: {
@@ -30,6 +31,13 @@ export const SCREENSHOT_CONFIG = {
     outputDir: 'public/assets',
     imageFormat: 'png',
     fullPage: false,
+    
+    // Theme configuration
+    themes: {
+        enabled: true,
+        capture: ['light', 'dark'], // Themes to capture
+        defaultTheme: 'light', // Fallback theme
+    },
     
     // Retry configuration
     maxRetries: 3,

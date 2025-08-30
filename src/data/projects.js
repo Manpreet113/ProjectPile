@@ -7,7 +7,10 @@ export const PROJECTS = [
         name: "HyprL",
         url: "https://hyprl.projectpile.tech",
         repo: "https://github.com/Manpreet113/hyprL",
-        thumbnail: "/assets/hyprl.png",
+        thumbnails: {
+            light: "/assets/hyprl-light.png",
+            dark: "/assets/hyprl-dark.png"
+        },
         description: "HyprL takes the power of Hyprland and makes it approachable for everyone by providing one-command installation and beginner friendly guides."
     },
     {
@@ -15,7 +18,10 @@ export const PROJECTS = [
         name: "Portfolio",
         url: "https://manpreet.tech",
         repo: "https://github.com/Manpreet113/portfolio-site",
-        thumbnail: "/assets/portfolio.png",
+        thumbnails: {
+            light: "/assets/portfolio-light.png",
+            dark: "/assets/portfolio-dark.png"
+        },
         description: "A showcase of my work, featuring projects that demonstrate my skills and expertise."
     },
     {
@@ -23,7 +29,10 @@ export const PROJECTS = [
         name: "Project Pile",
         url: "https://projectpile.tech",
         repo: "https://github.com/Manpreet113/ProjectPile",
-        thumbnail: "/assets/projectpile.png",
+        thumbnails: {
+            light: "/assets/projectpile-light.png",
+            dark: "/assets/projectpile-dark.png"
+        },
         description: "The root domain for Project Pile, a collection of my projects and experiments in web development and design."
     },
     {
@@ -31,7 +40,10 @@ export const PROJECTS = [
         name: "NoteHole",
         url: "https://notehole.projectpile.tech",
         repo: "https://github.com/Manpreet113/NoteHole",
-        thumbnail: "/assets/notehole.png",
+        thumbnails: {
+            light: "/assets/notehole-light.png",
+            dark: "/assets/notehole-dark.png"
+        },
         description: "A secure encrypted note-taking app built from using React, Tailwind CSS, and Supabase."
     }
 ];
@@ -42,6 +54,6 @@ export function getScreenshotConfig() {
         id: project.id,
         name: project.name,
         url: project.url,
-        filename: project.thumbnail.replace('/assets/', ''),
+        filename: project.thumbnails.light.replace('/assets/', '').replace('-light', ''),
     }));
 }

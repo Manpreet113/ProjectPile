@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { ExternalLink, Github } from "lucide-react";
 import { PROJECTS } from '../data/projects.js';
+import { useTheme } from '../hooks/useTheme.js';
 import '../styles/pilegrid.css';
 
-const PileGrid = ({ cards }) => {
+const PileGrid = ({ cards, theme }) => {
     const [selectedId, setSelectedId] = useState(null);
 
     const selected = useMemo(() => cards.find((card) => card.id === selectedId), [cards, selectedId]);
@@ -179,22 +180,36 @@ const contentComponents = {
     "NoteHole": SkeletonFour
 };
 
-// Generate cards from shared project data
-const cards = PROJECTS.map(project => ({
-    id: project.id,
-    name: project.name,
-    content: React.createElement(contentComponents[project.name]),
-    className: "col-span-1",
-    thumbnail: project.thumbnail,
-    deployedAt: project.url,
-    repo: project.repo
-}));
-
 // --- Wrapper Component used in Astro ---
 export function PileGridDemo() {
+    const { theme, isLoading } = useTheme();
+    
+    // Generate cards from shared project data with theme-aware thumbnails
+    const cards = useMemo(() => PROJECTS.map(project => ({
+        id: project.id,
+        name: project.name,
+        content: React.createElement(contentComponents[project.name]),
+        className: "col-span-1",
+        thumbnail: project.thumbnails[theme] || project.thumbnails.light, // Fallback to light
+        thumbnails: project.thumbnails, // Keep all thumbnails for modal
+        deployedAt: project.url,
+        repo: project.repo
+    })), [theme]);
+    
+    // Show loading state while theme is being detected
+    if (isLoading) {
+        return (
+            <div className="h-full py-20 w-full flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-pulse text-lg">Loading portfolio...</div>
+                </div>
+            </div>
+        );
+    }
+    
     return (
         <div className="h-full py-20 w-full">
-            <PileGrid cards={cards} />
+            <PileGrid cards={cards} theme={theme} />
         </div>
     );
 }

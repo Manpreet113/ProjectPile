@@ -9,6 +9,7 @@
     "preview": "astro preview",
     "screenshots": "node scripts/generate-screenshots.js",
     "screenshots:dev": "npm run screenshots && npm run dev",
+    "screenshots:verify": "node scripts/test-theme-screenshots.js",
     "astro": "astro"
   },
   "dependencies": {

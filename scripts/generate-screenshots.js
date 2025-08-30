@@ -3,33 +3,57 @@ import fs from 'fs/promises';
 import path from 'path';
 import { PROJECTS, getProjectConfig } from './screenshot-config.js';
 
-async function captureScreenshot(browser, project, attempt = 1) {
+// Theme-specific browser configurations
+const THEME_CONFIGS = {
+    light: {
+        colorScheme: 'light',
+        prefersColorScheme: 'light',
+        emulateMedia: [{ media: 'prefers-color-scheme', value: 'light' }]
+    },
+    dark: {
+        colorScheme: 'dark', 
+        prefersColorScheme: 'dark',
+        emulateMedia: [{ media: 'prefers-color-scheme', value: 'dark' }]
+    }
+};
+
+async function captureThemeScreenshot(browser, project, theme, attempt = 1) {
     const config = getProjectConfig(project);
+    const themeConfig = THEME_CONFIGS[theme];
     const isRetry = attempt > 1;
     
-    console.log(`📸 ${isRetry ? `Retry ${attempt}/${config.maxRetries} - ` : ''}Capturing screenshot for ${project.name}...`);
+    console.log(`📸 ${isRetry ? `Retry ${attempt}/${config.maxRetries} - ` : ''}Capturing ${theme} theme screenshot for ${project.name}...`);
     
     const context = await browser.newContext({
         viewport: config.viewport,
-        // Disable animations for consistent screenshots
+        colorScheme: themeConfig.colorScheme,
         reducedMotion: 'reduce',
     });
     
     const page = await context.newPage();
     
     try {
+        // Set theme preference
+        await page.emulateMedia({ colorScheme: themeConfig.prefersColorScheme });
+        
         // Navigate to the page
         await page.goto(project.url, { 
             waitUntil: 'networkidle',
             timeout: config.timeout 
         });
         
-        // Wait additional time for any remaining animations/lazy loading
-        await page.waitForTimeout(config.waitAfterLoad);
+        // Try to set theme via common methods
+        await setPageTheme(page, theme);
         
-        // Take the screenshot
+        // Wait for theme to apply and page to settle
+        await page.waitForTimeout(config.waitAfterLoad + 1000);
+        
+        // Generate filename with theme suffix
+        const baseName = project.filename.replace('.png', '');
+        const themedFilename = `${baseName}-${theme}.png`;
+        
         const outputDir = path.join(process.cwd(), config.outputDir);
-        const screenshotPath = path.join(outputDir, project.filename);
+        const screenshotPath = path.join(outputDir, themedFilename);
         
         await page.screenshot({
             path: screenshotPath,
@@ -37,32 +61,120 @@ async function captureScreenshot(browser, project, attempt = 1) {
             fullPage: config.fullPage,
         });
         
-        console.log(`✅ Screenshot saved: ${project.filename}`);
-        return { success: true, project: project.name, attempt };
+        console.log(`✅ ${theme.charAt(0).toUpperCase() + theme.slice(1)} screenshot saved: ${themedFilename}`);
+        return { success: true, project: project.name, theme, filename: themedFilename, attempt };
         
     } catch (error) {
-        console.error(`❌ Attempt ${attempt} failed for ${project.name}:`, error.message);
+        console.error(`❌ Attempt ${attempt} failed for ${project.name} (${theme}):`, error.message);
         
         // Retry logic
         if (attempt < config.maxRetries) {
-            console.log(`⏳ Retrying in ${config.retryDelay/1000}s...`);
+            console.log(`⏳ Retrying ${theme} theme in ${config.retryDelay/1000}s...`);
             await new Promise(resolve => setTimeout(resolve, config.retryDelay));
-            return captureScreenshot(browser, project, attempt + 1);
+            return captureThemeScreenshot(browser, project, theme, attempt + 1);
         }
         
-        return { success: false, project: project.name, error: error.message, attempts: attempt };
+        return { success: false, project: project.name, theme, error: error.message, attempts: attempt };
     } finally {
         await context.close();
     }
+}
+
+// Helper function to set page theme using common methods
+async function setPageTheme(page, theme) {
+    try {
+        // Method 1: Try to click theme toggle button (common patterns)
+        const themeButtons = [
+            `[data-theme="${theme}"]`,
+            `[data-theme-toggle]`,
+            `.theme-toggle`,
+            `button[aria-label*="theme"]`,
+            `button[aria-label*="${theme}"]`,
+            `.dark-mode-toggle`,
+            `.theme-switcher`
+        ];
+        
+        for (const selector of themeButtons) {
+            try {
+                const button = await page.$(selector);
+                if (button) {
+                    await button.click();
+                    await page.waitForTimeout(500);
+                    break;
+                }
+            } catch (e) {
+                // Continue to next selector
+            }
+        }
+        
+        // Method 2: Try to set localStorage theme
+        await page.evaluate((theme) => {
+            const themeKeys = ['theme', 'darkMode', 'colorScheme', 'preferred-theme'];
+            themeKeys.forEach(key => {
+                localStorage.setItem(key, theme);
+                localStorage.setItem(key, theme === 'dark' ? 'dark' : 'light');
+            });
+        }, theme);
+        
+        // Method 3: Try to add theme class to document
+        await page.evaluate((theme) => {
+            document.documentElement.classList.remove('light', 'dark');
+            document.documentElement.classList.add(theme);
+            document.documentElement.setAttribute('data-theme', theme);
+            document.body.classList.remove('light', 'dark');
+            document.body.classList.add(theme);
+        }, theme);
+        
+        // Method 4: Dispatch theme change events
+        await page.evaluate((theme) => {
+            window.dispatchEvent(new CustomEvent('themechange', { detail: { theme } }));
+            window.dispatchEvent(new StorageEvent('storage', {
+                key: 'theme',
+                newValue: theme,
+                storageArea: localStorage
+            }));
+        }, theme);
+        
+    } catch (error) {
+        console.warn(`⚠️ Could not set theme for page, relying on browser preference:`, error.message);
+    }
+}
+
+async function captureProjectScreenshots(browser, project) {
+    const config = getProjectConfig(project);
+    const results = [];
+    
+    if (!config.themes.enabled) {
+        // Fallback to single screenshot if themes disabled
+        const result = await captureThemeScreenshot(browser, project, config.themes.defaultTheme);
+        return [result];
+    }
+    
+    // Capture screenshot for each theme
+    for (const theme of config.themes.capture) {
+        const result = await captureThemeScreenshot(browser, project, theme);
+        results.push(result);
+        
+        // Small delay between theme captures
+        if (config.themes.capture.indexOf(theme) < config.themes.capture.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, config.themeWaitDelay));
+        }
+    }
+    
+    return results;
 }
 
 async function generateAllScreenshots() {
     const config = getProjectConfig(PROJECTS[0]); // Get base config
     const outputDir = path.join(process.cwd(), config.outputDir);
     
-    console.log('🚀 Starting screenshot generation...');
+    console.log('🚀 Starting theme-aware screenshot generation...');
     console.log(`📁 Output directory: ${outputDir}`);
-    console.log(`📊 Processing ${PROJECTS.length} projects...`);
+    console.log(`📊 Processing ${PROJECTS.length} projects with ${config.themes.capture.length} themes each...`);
+    
+    if (config.themes.enabled) {
+        console.log(`🎨 Themes: ${config.themes.capture.join(', ')}`);
+    }
     
     // Ensure output directory exists
     await fs.mkdir(outputDir, { recursive: true });
@@ -70,14 +182,16 @@ async function generateAllScreenshots() {
     // Launch browser
     const browser = await chromium.launch(config.browser);
     
-    const results = [];
+    const allResults = [];
     
-    // Capture screenshots sequentially to avoid overwhelming the sites
+    // Capture screenshots for each project (with all themes)
     for (const project of PROJECTS) {
-        const result = await captureScreenshot(browser, project);
-        results.push(result);
+        console.log(`\n📂 Processing ${project.name}...`);
         
-        // Delay between captures (from config)
+        const projectResults = await captureProjectScreenshots(browser, project);
+        allResults.push(...projectResults);
+        
+        // Delay between projects
         if (PROJECTS.indexOf(project) < PROJECTS.length - 1) {
             await new Promise(resolve => setTimeout(resolve, config.delayBetweenCaptures));
         }
@@ -85,30 +199,46 @@ async function generateAllScreenshots() {
     
     await browser.close();
     
-    // Summary
-    const successful = results.filter(r => r.success).length;
-    const failed = results.filter(r => !r.success);
-    const retried = results.filter(r => r.attempt > 1).length;
+    // Calculate statistics
+    const totalExpected = PROJECTS.length * config.themes.capture.length;
+    const successful = allResults.filter(r => r.success).length;
+    const failed = allResults.filter(r => !r.success);
+    const retried = allResults.filter(r => r.attempt > 1).length;
+    
+    // Group results by theme
+    const byTheme = {};
+    config.themes.capture.forEach(theme => {
+        byTheme[theme] = allResults.filter(r => r.theme === theme && r.success).length;
+    });
     
     console.log('\n📊 Screenshot Generation Summary:');
-    console.log(`✅ Successful: ${successful}/${PROJECTS.length}`);
+    console.log(`✅ Total successful: ${successful}/${totalExpected}`);
+    
+    if (config.themes.enabled) {
+        console.log('\n🎨 By theme:');
+        Object.entries(byTheme).forEach(([theme, count]) => {
+            console.log(`  ${theme}: ${count}/${PROJECTS.length}`);
+        });
+    }
+    
     if (retried > 0) {
-        console.log(`🔄 Required retries: ${retried}`);
+        console.log(`\n🔄 Required retries: ${retried}`);
     }
     
     if (failed.length > 0) {
-        console.log('❌ Failed:');
-        failed.forEach(f => console.log(`  - ${f.project}: ${f.error} (${f.attempts} attempts)`));
+        console.log('\n❌ Failed:');
+        failed.forEach(f => console.log(`  - ${f.project} (${f.theme}): ${f.error}${f.attempts ? ` (${f.attempts} attempts)` : ''}`));
     }
     
     console.log('\n🎉 Screenshot generation complete!');
     
     return {
-        total: PROJECTS.length,
+        total: totalExpected,
         successful: successful,
         failed: failed.length,
         retried: retried,
-        results: results
+        byTheme: byTheme,
+        results: allResults
     };
 }
 
