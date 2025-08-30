@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import { ExternalLink, Github } from "lucide-react";
 import '../styles/pilegrid.css';
 
 const PileGrid = ({ cards }) => {
@@ -18,22 +19,55 @@ const PileGrid = ({ cards }) => {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, []);
 
+    const handleLinkClick = (e, url) => {
+        e.stopPropagation();
+        window.open(url, '_blank', 'noopener,noreferrer');
+    };
+
     return (
-        <div className="w-full h-full p-4 pt-0 grid grid-cols-1 max-w-7xl mx-auto gap-4 relative">
+        <div className="w-full h-full p-4 pt-0 grid grid-cols-1 md:grid-cols-2 max-w-6xl mx-auto gap-6 relative">
             {cards.map((card) => (
                 <div
                     key={card.id}
-                    className={`${card.className} cursor-pointer min-h-[300px]`}
+                    className="group cursor-pointer aspect-square relative"
                     onClick={() => setSelectedId(card.id)}
                 >
-                    <div className="rounded-xl h-full w-full overflow-hidden relative border-4 border-muted">
+                    <div className="rounded-2xl h-full w-full overflow-hidden relative border-2 border-border/20 hover:border-primary/40 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10">
                         <img
                             src={card.thumbnail}
                             height="500"
                             width="500"
-                            className="object-cover object-top absolute inset-0 h-full w-full"
+                            className="object-cover object-center absolute inset-0 h-full w-full transition-transform duration-500 group-hover:scale-105"
                             alt={card.name}
                         />
+                        
+                        {/* Gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-300" />
+                        
+                        {/* Project name */}
+                        <div className="absolute bottom-0 left-0 right-0 p-6">
+                            <h3 className="text-white font-bold text-2xl mb-3 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                                {card.name}
+                            </h3>
+                            
+                            {/* Action buttons */}
+                            <div className="flex gap-3 opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                                <button
+                                    onClick={(e) => handleLinkClick(e, card.deployedAt)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-primary/90 hover:bg-primary text-primary-foreground rounded-lg text-sm font-medium transition-colors duration-200 backdrop-blur-sm"
+                                >
+                                    <ExternalLink size={16} />
+                                    Live Site
+                                </button>
+                                <button
+                                    onClick={(e) => handleLinkClick(e, card.repo)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-secondary/90 hover:bg-secondary text-secondary-foreground rounded-lg text-sm font-medium transition-colors duration-200 backdrop-blur-sm"
+                                >
+                                    <Github size={16} />
+                                    Code
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             ))}
@@ -41,7 +75,7 @@ const PileGrid = ({ cards }) => {
             {selected && (
                 <>
                     <div
-                        className="modal-backdrop bg-muted/30"
+                        className="modal-backdrop bg-black/50 backdrop-blur-sm"
                     />
                     <div className="modal-container"
                         onClick={handleOutsideClick}>
@@ -65,11 +99,33 @@ const PileGrid = ({ cards }) => {
 
 // --- Content for the Selected Card ---
 const SelectedCardContent = ({ selected }) => {
+    const handleModalLinkClick = (url) => {
+        window.open(url, '_blank', 'noopener,noreferrer');
+    };
+
     return (
         <div className="bg-transparent h-full w-full flex flex-col justify-end rounded-lg shadow-2xl relative z-10">
             <div className="absolute inset-0 bg-black/60" />
             <div className="modal-content-container">
                 {selected.content}
+                
+                {/* Modal action buttons */}
+                <div className="flex gap-4 mt-6">
+                    <button
+                        onClick={() => handleModalLinkClick(selected.deployedAt)}
+                        className="flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg font-medium transition-colors duration-200"
+                    >
+                        <ExternalLink size={18} />
+                        Visit Live Site
+                    </button>
+                    <button
+                        onClick={() => handleModalLinkClick(selected.repo)}
+                        className="flex items-center gap-2 px-6 py-3 bg-secondary hover:bg-secondary/90 text-secondary-foreground rounded-lg font-medium transition-colors duration-200"
+                    >
+                        <Github size={18} />
+                        View Code
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -117,6 +173,7 @@ const SkeletonFour = () => (
 const cards = [
     {
         id: 1,
+        name: "HyprL",
         content: <SkeletonOne />,
         className: "col-span-1",
         thumbnail: "/assets/hyprl.png",
@@ -125,6 +182,7 @@ const cards = [
     },
     {
         id: 2,
+        name: "Portfolio",
         content: <SkeletonTwo />,
         className: "col-span-1",
         thumbnail: "/assets/portfolio.png",
@@ -133,6 +191,7 @@ const cards = [
     },
     {
         id: 3,
+        name: "Project Pile",
         content: <SkeletonThree />,
         className: "col-span-1",
         thumbnail: "/assets/projectpile.png",
